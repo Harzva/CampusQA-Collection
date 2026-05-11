@@ -13,8 +13,8 @@ CampusQA-Collection is both a code collection and a teaching project. The goal i
 
 ## Phase 2: Real RAG Quality
 
-- [ ] Store text chunks and metadata, not only document IDs.
-- [ ] Add chunking by token/window size.
+- [x] Store text chunks and metadata, not only document IDs.
+- [x] Add chunking by fixed window size.
 - [ ] Add source citations in answers.
 - [ ] Add retrieval score display in debug mode.
 - [ ] Add reranking before prompt assembly.
@@ -42,4 +42,3 @@ CampusQA-Collection is both a code collection and a teaching project. The goal i
 - [ ] Observability: logs, metrics, tracing.
 - [ ] CI for frontend and backend builds.
 - [ ] Deployment profiles for local, staging, and production.
-

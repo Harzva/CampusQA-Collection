@@ -34,6 +34,8 @@
 | `hierarchy_memory` | 5 | Adds layered conversation and wiki memory. |
 | `hyper_memory` | 6 | Adds the final HyperMemory aggregation layer. |
 
+All stages share the upgraded retrieval core: uploaded files are split into text chunks, Milvus stores chunk IDs, and answers receive hydrated source text instead of bare vector/document IDs.
+
 ## How To Use This Repository
 
 Run any stage independently:
