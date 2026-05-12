@@ -103,6 +103,22 @@ Open:
 
 Set `OPENAI_API_KEY` in `.env` before expecting model-backed answers.
 
+## Mode Switching
+
+The browser workbench now uses explicit mode buttons for RAG, Agent, LLM Wiki, and GBrain. RAG and LLM Wiki share the same indexed knowledge base; Agent calls retrieval as a tool, while GBrain adds deterministic skill inspection on top of wiki memory.
+
+```bash
+curl -N -X POST http://localhost:8080/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"conversationId":"local-rag","userInput":"Which office handles scholarship questions?"}'
+```
+
+```bash
+curl -N -X POST http://localhost:8080/api/wiki/chat \
+  -H "Content-Type: application/json" \
+  -d '{"conversationId":"local-wiki","userInput":"Which office handles scholarship questions?"}'
+```
+
 ## Repository Layout
 
 ```text
