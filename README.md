@@ -26,6 +26,14 @@
   <img src="docs/assets/screenshots/campus-agent-dashboard.png" alt="CampusAgent-QA frontend preview" width="920">
 </p>
 
+## Architecture Framework
+
+<p align="center">
+  <img src="docs/assets/architecture/campus-agent-architecture.png" alt="CampusAgent-QA architecture framework" width="920">
+</p>
+
+> This image is an ImageGen-rendered visual architecture map. The Mermaid diagram and OpenAPI docs remain the exact engineering contract.
+
 ## Position
 
 CampusAgent-QA is the agentic repository in the final three-repo set. It is no longer a collection of separated versions: the repo now presents one runnable application with four modes sharing the same ingestion and retrieval foundation.
