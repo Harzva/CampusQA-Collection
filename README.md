@@ -16,6 +16,8 @@
   <a href="#quick-start">Quick Start</a> |
   <a href="docs/OPERATIONS.md">Operations</a> |
   <a href="docs/PRODUCTION-ARCHITECTURE.md">Architecture</a> |
+  <a href="docs/PRODUCTION-GAPS.md">Production Gaps</a> |
+  <a href="docs/MAINTENANCE.md">Maintenance</a> |
   <a href="docs/BOT-INTEGRATION.md">Bot Integration</a> |
   <a href="docs/OPEN_SOURCE_REFERENCES.md">References</a>
 </p>
@@ -44,13 +46,17 @@ CampusAgent-QA is the agentic repository in the final three-repo set. It is no l
 | GBrain | `/api/gbrain/chat` | Adds deterministic skill inspection over wiki memory. |
 | Bot Gateway | `/api/bot/{channel}/callback` | Routes normalized Feishu, DingTalk, and WeChat messages. |
 
-## Frontend Preview
+## Visual Walkthrough
 
-The first screen is the actual workbench users operate: mode switch, upload flow, and streaming-ready chat panel.
+Six README-owned screenshots show the runnable workbench across RAG, Agent, GBrain, Bot readiness, and mobile layout.
 
-<p align="center">
-  <img src="docs/assets/screenshots/campus-agent-dashboard.png" alt="CampusAgent-QA workbench" width="920">
-</p>
+| Dashboard | RAG mode | Agent mode |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/campus-agent-dashboard.png" alt="CampusAgent-QA dashboard" width="300"> | <img src="docs/assets/screenshots/campus-agent-rag-mode.png" alt="CampusAgent-QA RAG mode" width="300"> | <img src="docs/assets/screenshots/campus-agent-agent-mode.png" alt="CampusAgent-QA Agent mode" width="300"> |
+
+| GBrain conversation | Production readiness | Mobile |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/campus-agent-gbrain-conversation.png" alt="CampusAgent-QA GBrain conversation" width="300"> | <img src="docs/assets/screenshots/campus-agent-readiness.png" alt="CampusAgent-QA production readiness" width="300"> | <img src="docs/assets/screenshots/campus-agent-mobile.png" alt="CampusAgent-QA mobile" width="160"> |
 
 ## Architecture
 
@@ -97,14 +103,18 @@ frontend/             Vue 3 workbench
 docs/assets/          README screenshots
 docs/OPERATIONS.md    Runtime and endpoint notes
 docs/PRODUCTION-ARCHITECTURE.md
+docs/PRODUCTION-GAPS.md
+docs/MAINTENANCE.md
 docs/BOT-INTEGRATION.md
+docs/SCREENSHOTS.md
 docs/openapi/          API contract templates
 deploy/k8s/            Kubernetes deployment template
 docs/PRODUCTION-REVIEW.md
+SECURITY.md            Security policy and secret-handling notes
 docker-compose.yml    Full local runtime stack
 .env.example          Runtime configuration template
 ```
 
 ## Production Readiness
 
-See [Production Review](docs/PRODUCTION-REVIEW.md) for the detailed audit. The next highest-impact work is protecting skill execution, persisting Wiki/GBrain state, exposing tool-call traces, and Docker Compose smoke tests in CI.
+See [Production Review](docs/PRODUCTION-REVIEW.md) and [Production Gaps](docs/PRODUCTION-GAPS.md) for the detailed audit. The remaining production blockers are authentication, tenant isolation, GBrain admin protection, Bot idempotency, and tool-call traces.

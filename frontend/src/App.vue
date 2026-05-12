@@ -92,6 +92,30 @@
           </button>
         </div>
       </section>
+
+      <section class="panel readiness-panel">
+        <div class="panel-heading">
+          <span class="step">03</span>
+          <div>
+            <h2>Production Readiness</h2>
+            <p>{{ readinessSubtitle }}</p>
+          </div>
+        </div>
+
+        <div class="signal-grid">
+          <article v-for="signal in readinessSignals" :key="signal.label" class="signal-card">
+            <span>{{ signal.label }}</span>
+            <strong>{{ signal.value }}</strong>
+            <small>{{ signal.detail }}</small>
+          </article>
+        </div>
+
+        <div class="integration-strip">
+          <span v-for="channel in botChannels" :key="channel" class="integration-pill">
+            {{ channel }}
+          </span>
+        </div>
+      </section>
     </main>
   </div>
 </template>
@@ -176,6 +200,17 @@ const themes = {
   },
 };
 
+const readinessSubtitle = 'Agent routing, Bot channels, observability, and deployment surfaces prepared for production review.';
+
+const readinessSignals = [
+  { label: 'Gateway', value: 'Feishu / DingTalk / WeChat', detail: 'Disabled until secrets are configured' },
+  { label: 'Agent', value: 'Retrieval tools', detail: 'No hardcoded campus FAQ path' },
+  { label: 'Metrics', value: '/actuator/prometheus', detail: 'Prometheus-ready runtime telemetry' },
+  { label: 'Deploy', value: 'Compose + K8s', detail: 'Local stack and cluster template included' },
+];
+
+const botChannels = ['Feishu Bot', 'DingTalk Bot', 'WeChat Bot', 'RAG', 'Wiki', 'Agent', 'GBrain'];
+
 const selectedFile = ref(null);
 const uploadStatus = ref('');
 const uploading = ref(false);
@@ -196,8 +231,38 @@ function applyTheme() {
   });
 }
 
-onMounted(applyTheme);
+onMounted(() => {
+  applyRoutePreview();
+  applyTheme();
+});
 watch(selectedTheme, applyTheme);
+
+function applyRoutePreview() {
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get('mode');
+  const theme = params.get('theme');
+  const demo = params.get('demo');
+
+  if (modes.some((candidate) => candidate.value === mode)) {
+    selectedMode.value = mode;
+  }
+  if (theme && themes[theme]) {
+    selectedTheme.value = theme;
+  }
+  if (demo === 'conversation') {
+    messages.value = [
+      { id: ++messageCounter, role: 'User', content: 'Which office handles scholarship policy questions?' },
+      {
+        id: ++messageCounter,
+        role: 'Assistant',
+        content: `${currentMode.value.label} used retrieval-backed context before answering, with a clear path for tool-call traces.`,
+      },
+    ];
+  }
+  if (demo === 'upload') {
+    uploadStatus.value = `Indexed policy-handbook.md for ${currentMode.value.label}.`;
+  }
+}
 
 function onFileChange(event) {
   selectedFile.value = event.target.files?.[0] ?? null;
@@ -496,6 +561,64 @@ select {
   flex-direction: column;
 }
 
+.readiness-panel {
+  grid-column: 1 / -1;
+}
+
+.signal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.signal-card {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.signal-card span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.signal-card strong {
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.signal-card small {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.integration-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.integration-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .messages {
   flex: 1;
   min-height: 360px;
@@ -639,6 +762,10 @@ select {
 
   .message {
     max-width: 92%;
+  }
+
+  .signal-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
