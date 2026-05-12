@@ -1,9 +1,8 @@
 # Operations Guide
 
-Each folder is a standalone Docker Compose project. Pick exactly one stage to run unless you change ports in that stage's `.env`.
+## Local Runtime
 
 ```bash
-cd hyper_memory
 cp .env.example .env
 docker compose up -d --build
 ```
@@ -12,24 +11,36 @@ Open:
 
 - Frontend: `http://localhost:3000`
 - Backend health: `http://localhost:8080/actuator/health`
+- MinIO console: `http://localhost:9001`
 
-## Port Conflicts
+Set `OPENAI_API_KEY` in `.env` before using model-backed chat.
 
-All stages default to the same ports. To run multiple stages at once, set different values in each folder's `.env`.
+## Modes
 
-```text
-FRONTEND_PORT=3001
-BACKEND_PORT=8081
-REDIS_PORT=6380
-```
+| Mode | Chat endpoint | Upload endpoint | Purpose |
+| --- | --- | --- | --- |
+| RAG | `/api/chat` | `/api/documents` | Direct retrieval-augmented QA. |
+| Agent | `/api/agent/chat` | `/api/documents` | Tool-using agent over the retrieval core. |
+| LLM Wiki | `/api/wiki/chat` | `/api/wiki/upload` | Wiki-style memory over retrieved chunks. |
+| GBrain | `/api/gbrain/chat` | `/api/wiki/upload` | Skill layer over wiki memory. |
 
-Database, MinIO, and Milvus ports also need to be adjusted if those services are exposed on the host.
+## Runtime Configuration
 
-## Comparison Workflow
+| Variable | Purpose |
+| --- | --- |
+| `OPENAI_API_KEY` | OpenAI-compatible model provider key. |
+| `OPENAI_CHAT_MODEL` | Chat model name. |
+| `OPENAI_EMBEDDING_MODEL` | Embedding model name. |
+| `FRONTEND_PORT` | Browser-facing frontend port. |
+| `BACKEND_PORT` | Browser/API-facing backend port. |
+| `MYSQL_ROOT_PASSWORD` | Local MySQL root password. |
+| `MINIO_ROOT_USER` | Local MinIO username. |
+| `MINIO_ROOT_PASSWORD` | Local MinIO password. |
 
-```powershell
-.\tools\compare-versions.ps1 -From rag_qa -To gbrain
-```
+## Production Checklist
 
-The script runs `git diff --no-index` between two local folders, so it works even without separate branches.
-
+- Add authentication before exposing `/api/gbrain/skills/run-all`.
+- Persist wiki and skill state outside in-memory maps.
+- Add source citation payloads for frontend rendering.
+- Add CI for `npm run build` and `mvn test`.
+- Add observability for retrieval latency, model latency, and tool calls.

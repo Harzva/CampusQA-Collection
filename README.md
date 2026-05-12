@@ -1,103 +1,101 @@
-<p align="center">
-  <a href="#readme">English</a>
-</p>
-
-<h1 align="center">CampusQA-Collection</h1>
+<h1 align="center">CampusAgent-QA</h1>
 
 <p align="center">
-  <em>"A teachable evolution map from RAG QA to HyperMemory."</em>
+  Agentic campus knowledge QA with <strong>RAG retrieval</strong>, <strong>LLM Wiki</strong>, and <strong>GBrain skills</strong>.
 </p>
 
 <p align="center">
-  <img alt="Collection" src="https://img.shields.io/badge/Type-Collection-111827">
-  <img alt="Tutorial" src="https://img.shields.io/badge/Mode-Tutorial-2563EB">
-  <img alt="Diff" src="https://img.shields.io/badge/Compare-Version%20Diff-7C3AED">
-  <img alt="Docker" src="https://img.shields.io/badge/Run-Docker%20Compose-2496ED?logo=docker&logoColor=white">
+  <img alt="Java 17" src="https://img.shields.io/badge/Java-17-007396?logo=openjdk&logoColor=white">
+  <img alt="Spring Boot 3.3" src="https://img.shields.io/badge/Spring%20Boot-3.3-6DB33F?logo=springboot&logoColor=white">
+  <img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white">
+  <img alt="Agent" src="https://img.shields.io/badge/Agent-Retrieval%20Tools-334155">
+  <img alt="Docker Compose" src="https://img.shields.io/badge/Run-Docker%20Compose-2496ED?logo=docker&logoColor=white">
 </p>
 
 <p align="center">
-  This is the special repository in the family: it keeps every method side by side and explains what changed between them.
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="docs/OPERATIONS.md">Operations</a> ·
+  <a href="docs/PRODUCTION-REVIEW.md">Production Review</a>
 </p>
 
-| Base RAG | HyperMemory |
+<p align="center">
+  <img src="docs/assets/screenshots/campus-agent-dashboard.png" alt="CampusAgent-QA frontend preview" width="920">
+</p>
+
+## Position
+
+CampusAgent-QA is the agentic repository in the final three-repo set. It is no longer a collection of separated versions: the repo now presents one runnable application with four modes sharing the same ingestion and retrieval foundation.
+
+| Repository | Role |
 | --- | --- |
-| ![CampusRAG-QA](docs/assets/screenshots/campus-rag-dashboard.png) | ![HyperMemory](docs/assets/screenshots/hypermemory-mode.png) |
+| `Harzva/CampusRAG-QA` | Baseline RAG + Wiki mode. |
+| `Harzva/CampusAgent-QA` | Agent tools, Wiki memory, and GBrain skills. |
+| `Harzva/HyperMemory` | Final memory-enhanced system. |
 
-## What Is Inside
+## What It Does
 
-| Folder | Stage | Key idea |
+| Mode | Endpoint | Purpose |
 | --- | --- | --- |
-| `rag_qa` | 1 | Base document RAG. |
-| `rag_agent` | 2 | Adds agent tool calling. |
-| `llm_wiki` | 3 | Adds wiki-style memory from documents. |
-| `gbrain` | 4 | Adds a skill layer on top of wiki memory. |
-| `hierarchy_memory` | 5 | Adds layered conversation and wiki memory. |
-| `hyper_memory` | 6 | Adds the final HyperMemory aggregation layer. |
+| RAG | `/api/chat` | Direct grounded QA over retrieved chunks. |
+| Agent | `/api/agent/chat` | Uses retrieval tools instead of hardcoded FAQ answers. |
+| LLM Wiki | `/api/wiki/chat` | Presents retrieved chunks as wiki-style memory. |
+| GBrain | `/api/gbrain/chat` | Adds deterministic skill inspection over wiki memory. |
 
-All stages share the upgraded retrieval core: uploaded files are split into text chunks, Milvus stores chunk IDs, and answers receive hydrated source text instead of bare vector/document IDs.
+## Frontend Preview
 
-## How To Use This Repository
+The first screen is the actual workbench users operate: mode switch, upload flow, and streaming-ready chat panel.
 
-Run any stage independently:
+<p align="center">
+  <img src="docs/assets/screenshots/campus-agent-dashboard.png" alt="CampusAgent-QA workbench" width="920">
+</p>
+
+## Architecture
+
+```mermaid
+flowchart LR
+    User["Browser"] --> UI["Vue 3 Workbench"]
+    UI --> API["Spring Boot API"]
+    API --> RAG["RAG Service"]
+    API --> Agent["Agent Service"]
+    API --> Wiki["Wiki Facade"]
+    API --> GBrain["GBrain Service"]
+    Agent --> Retrieval["Retrieval Context Service"]
+    RAG --> Retrieval
+    Wiki --> Retrieval
+    GBrain --> Wiki
+    Retrieval --> Milvus[("Milvus vectors")]
+    Retrieval --> MySQL[("MySQL chunks")]
+    API --> MinIO[("MinIO files")]
+    API --> Model["OpenAI-compatible models"]
+```
+
+## Quick Start
 
 ```bash
-cd rag_qa
 cp .env.example .env
 docker compose up -d --build
 ```
 
-The default URLs are:
+Open:
 
 - Frontend: `http://localhost:3000`
 - Backend health: `http://localhost:8080/actuator/health`
+- MinIO console: `http://localhost:9001`
 
-Only run one stage at a time unless you change `FRONTEND_PORT`, `BACKEND_PORT`, and the database/storage ports.
+Set `OPENAI_API_KEY` in `.env` before expecting model-backed answers.
 
-## Tutorial And Comparison Plan
-
-CampusQA-Collection is designed to become a GitHub Pages tutorial site. The site will let readers select any two stages and see:
-
-- Added controllers and endpoints.
-- Added services and memory layers.
-- Frontend mode changes.
-- Docker/runtime changes.
-- Key code paths to inspect next.
-
-Local comparison script:
-
-```powershell
-.\tools\compare-versions.ps1 -From rag_qa -To hyper_memory
-```
-
-Static tutorial site source:
+## Repository Layout
 
 ```text
-docs-site/
+backend/              Spring Boot API, RAG, Agent, Wiki, and GBrain services
+frontend/             Vue 3 workbench
+docs/assets/          README screenshots
+docs/OPERATIONS.md    Runtime and endpoint notes
+docs/PRODUCTION-REVIEW.md
+docker-compose.yml    Full local runtime stack
+.env.example          Runtime configuration template
 ```
 
-Main planning documents:
+## Production Readiness
 
-- [Roadmap](docs/ROADMAP.md)
-- [Version matrix](docs/VERSION-MATRIX.md)
-- [Comparison guide](docs/COMPARISON-GUIDE.md)
-- [Operations guide](docs/OPERATIONS.md)
-
-## Evolution Map
-
-```mermaid
-flowchart LR
-    A[RAG QA] --> B[RAG Agent]
-    B --> C[LLM Wiki]
-    C --> D[GBrain]
-    D --> E[Hierarchy Memory]
-    E --> F[HyperMemory]
-```
-
-## Current Engineering Improvements
-
-- Every stage now has a Vite `index.html`.
-- Docker frontend images proxy `/api` through nginx to the backend.
-- Runtime configuration is documented in `.env.example`.
-- Docker Compose uses configurable ports and health checks.
-- Spring Boot actuator health/info endpoints are exposed.
-- Screenshots and tutorial docs are included at the collection root.
+See [Production Review](docs/PRODUCTION-REVIEW.md) for the detailed audit. The next highest-impact work is protecting skill execution, persisting Wiki/GBrain state, exposing tool-call traces, and Docker Compose smoke tests in CI.
