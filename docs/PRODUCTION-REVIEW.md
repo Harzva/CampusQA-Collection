@@ -15,6 +15,8 @@ CampusAgent-QA is the agentic product in the three-repository set. It combines t
 | GBrain | Replaced placeholder console skills with deterministic inspection skills and structured names. |
 | Documentation | Added operations notes, architecture map, and production checklist. |
 | CI | Added GitHub Actions jobs for frontend build and backend Maven tests. |
+| Bot integration | Added a disabled-by-default Bot gateway for Feishu, DingTalk, and WeChat adapters. |
+| Observability | Added Prometheus metrics exposure and graceful shutdown settings. |
 
 ## Highest-Impact Next Work
 
@@ -23,6 +25,7 @@ CampusAgent-QA is the agentic product in the three-repository set. It combines t
 | P0 | Protect `/api/gbrain/skills/run-all` | Manual skill execution must be authenticated. |
 | P1 | Persist Wiki and GBrain state | In-memory state is not enough for production. |
 | P1 | Add tool-call trace output | Operators need to see which tools the agent used. |
+| P1 | Add Bot idempotency storage | Prevents duplicate platform retries from creating duplicate model calls. |
 | P2 | Add versioned skill definitions | Skills need lifecycle, owner, schedule, and audit fields. |
 | P2 | Expand CI with Docker Compose smoke tests | Verifies the whole runtime, not only builds. |
 
