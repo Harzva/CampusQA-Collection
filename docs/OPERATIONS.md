@@ -63,6 +63,33 @@ See [Bot Integration Guide](BOT-INTEGRATION.md) for signed requests. A valid cal
 curl -i http://localhost:8080/actuator/health
 ```
 
+## Business Metrics
+
+Custom Prometheus metrics are exposed at `/actuator/prometheus` alongside the default Spring Boot metrics.
+
+| Metric | Type | Tags | Description |
+| --- | --- | --- | --- |
+| `campus.qa.operation.requests` | Counter | `operation`, `mode`, `status`, `tenant_scope` | Total QA operation attempts. `status` is `success` or `error`. |
+| `campus.qa.operation.duration` | Timer | `operation`, `mode`, `status`, `tenant_scope` | Latency distribution per QA operation. |
+| `campus.qa.sources.count` | DistributionSummary | `mode`, `tenant_scope` | Number of source citations returned per successful call. |
+
+`mode` values: `rag`, `llm-wiki`, `agent`, `gbrain`. `tenant_scope` is `default` for blank or `default` tenants, `custom` otherwise.
+
+Example Prometheus queries:
+
+```promql
+# P95 latency by mode
+histogram_quantile(0.95, sum by (le, mode) (rate(campus_qa_operation_duration_seconds_bucket[5m])))
+
+# Error rate by mode
+sum by (mode) (rate(campus_qa_operation_requests_total{status="error"}[5m]))
+  / sum by (mode) (rate(campus_qa_operation_requests_total[5m]))
+
+# Average source count by mode
+sum by (mode) (rate(campus_qa_sources_count_sum[5m]))
+  / sum by (mode) (rate(campus_qa_sources_count_count[5m]))
+```
+
 ## Production Checklist
 
 - Protect `/api/gbrain/skills/run-all` before exposing it to shared users.
@@ -72,4 +99,4 @@ curl -i http://localhost:8080/actuator/health
 - ~~Add idempotency storage for Bot message IDs before enabling platform retries.~~ Done: `BotIdempotencyService` acquires a Redis `SETNX` key by `(tenantId, channel, messageId)` before dispatch. Concurrent duplicates are ignored, successful messages keep the key until TTL expiry, and processing exceptions release the key so platform retries can run again. Missing `tenantId` defaults to `"default"`. Set `BOT_IDEMPOTENCY_ENABLED=false` to disable.
 - ~~Add gateway rate limits before exposing public Bot endpoints.~~ Done: `BotRateLimitService` enforces a fixed-window counter per `(tenantId, channel)` via Redis `INCR` + `EXPIRE`. Keys are scoped as `bot:rate-limit:<tenant>:<channel>:<bucket>` and auto-expire after the window. Excess requests receive `429 Too Many Requests`. Set `BOT_RATE_LIMIT_ENABLED=false` to disable. Fails open on Redis errors.
 - Add RBAC for user-to-tenant membership and admin-only document namespace management.
-- Add observability for retrieval latency, model latency, and tool calls.
+- ~~Add business-level observability for QA modes.~~ Done: `QaMetricsService` records `campus.qa.operation.duration` (timer), `campus.qa.operation.requests` (counter), and `campus.qa.sources.count` (distribution summary) for RAG, LLM Wiki, Agent, and GBrain modes. Exposed via `/actuator/prometheus`. Fine-grained retrieval/model/tool spans can still be added later.
