@@ -21,8 +21,10 @@ Set `OPENAI_API_KEY` in `.env` before using model-backed chat.
 | Mode | Chat endpoint | Upload endpoint | Purpose |
 | --- | --- | --- | --- |
 | RAG | `/api/chat` | `/api/documents` | Direct retrieval-augmented QA. |
+| RAG with sources | `/api/chat/with-sources` | `/api/documents` | Same as RAG, returns `AnswerWithSources` JSON with source citations. |
 | Agent | `/api/agent/chat` | `/api/documents` | Tool-using agent over the retrieval core. |
 | LLM Wiki | `/api/wiki/chat` | `/api/wiki/upload` | Wiki-style memory over retrieved chunks. |
+| LLM Wiki with sources | `/api/wiki/chat/with-sources` | `/api/wiki/upload` | Same as Wiki, returns `AnswerWithSources` JSON with source citations. |
 | GBrain | `/api/gbrain/chat` | `/api/wiki/upload` | Skill layer over wiki memory. |
 | Bot Gateway | `/api/bot/{channel}/callback` | N/A | Normalized Feishu, DingTalk, and WeChat callbacks. |
 
@@ -58,7 +60,7 @@ curl -i http://localhost:8080/actuator/health
 
 - Protect `/api/gbrain/skills/run-all` before exposing it to shared users.
 - Persist wiki and skill state outside in-memory maps.
-- Add source citation payloads for frontend rendering.
+- ~~Add source citation payloads for frontend rendering.~~ Done: `AnswerWithSources` DTO returned from `/api/chat/with-sources` and `/api/wiki/chat/with-sources`. Bot gateway responses (`BotMessageResponse`) now include an optional `sources` list for `rag` and `wiki` modes. `agent` and `gbrain` modes remain answer-only.
 - ~~Add idempotency storage for Bot message IDs before enabling platform retries.~~ Done: `BotIdempotencyService` acquires a Redis `SETNX` key by `(tenantId, channel, messageId)` before dispatch. Concurrent duplicates are ignored, successful messages keep the key until TTL expiry, and processing exceptions release the key so platform retries can run again. Missing `tenantId` defaults to `"default"`. Set `BOT_IDEMPOTENCY_ENABLED=false` to disable.
 - Add RBAC around `tenantId`, allowed modes, and document namespace.
 - Add observability for retrieval latency, model latency, and tool calls.
