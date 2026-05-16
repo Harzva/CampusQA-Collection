@@ -18,7 +18,7 @@ This repository is deployable as an agentic campus QA service, but it still need
 | Agent tool traces are not returned | Operators cannot inspect why the agent chose a path. Agent-level latency and error metrics are now available via `campus.qa.operation.*` on `/actuator/prometheus`. | Return tool name, inputs, retrieved sources, and latency in API responses. |
 | Wiki/GBrain state is partly in memory | State can disappear after restarts. | Persist skill state, runs, and wiki snapshots. |
 | `ddl-auto: update` | Schema changes are implicit. | Introduce Flyway/Liquibase migrations. |
-| No alert rules | Metrics exist but no alert policy. | Add Prometheus alert rules for 5xx, latency, memory, and tool failures. |
+| Base alert rules added | Prometheus alert rules exist for HTTP errors, QA errors, latency, memory, and traffic lulls. | Wire Prometheus/Alertmanager to the rule file and tune thresholds to real traffic. |
 
 ## P2 Product Refinement
 
