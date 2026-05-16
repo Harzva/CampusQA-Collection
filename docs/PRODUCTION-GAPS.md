@@ -1,36 +1,29 @@
-# Remaining Production Gaps
+# Production Readiness Status
 
-This repository is deployable as an agentic campus QA service, but it still needs the following work before being treated as a mature production system.
+This repository now has the minimum closure needed for a controlled staging-to-production path.
 
-## P0 Before Real Users
+## Closed Minimum Gates
 
-| Gap | Impact | Recommended fix |
-| --- | --- | --- |
-| No user authentication | Anyone reaching the API can upload, query, or run skills. | Add OAuth/OIDC or gateway auth before public exposure. |
-| No tenant-scoped document isolation | Knowledge and conversations can mix across organizations. | Add `tenantId` to documents, chunks, conversations, tools, and retrieval filters. |
-| `/api/gbrain/skills/run-all` is unauthenticated | Manual skill execution can be abused. | Restrict to admin roles and add audit logs. |
-| No Bot idempotency store | Platform retries can trigger duplicate tool and model calls. | Store `(channel, messageId)` in Redis or MySQL with TTL. |
+| Gate | Status |
+| --- | --- |
+| API authentication and RBAC | Closed with token-based `USER`/`ADMIN` roles, tenant-bound access checks, and admin-only GBrain skill execution. Replace with OIDC before broad public use. |
+| Tenant isolation | Closed for document upload, RAG retrieval, Wiki lookup, Agent/GBrain execution, and Bot dispatch through normalized `tenantId`. |
+| Durable Wiki and GBrain state | Closed through `wiki_pages` and `gbrain_skill_runs` JPA persistence. |
+| Schema migration | Closed with Flyway baseline migration and `ddl-auto=validate`. |
+| Golden QA in CI | Closed with offline golden suite validation in the CI workflow. |
+| Bot idempotency and rate limit | Closed with Redis-backed duplicate suppression and fixed-window throttling. |
+| Staging backup/restore and alert drill | Closed through `docs/STAGING-RUNBOOK.md` and `scripts/staging_drill.sh`. |
 
-## P1 Operational Hardening
+## Still Intentional Post-MVP Work
 
-| Gap | Impact | Recommended fix |
-| --- | --- | --- |
-| Agent tool traces are not returned | Operators cannot inspect why the agent chose a path. Agent-level latency and error metrics are now available via `campus.qa.operation.*` on `/actuator/prometheus`. | Return tool name, inputs, retrieved sources, and latency in API responses. |
-| Wiki/GBrain state is partly in memory | State can disappear after restarts. | Persist skill state, runs, and wiki snapshots. |
-| `ddl-auto: update` | Schema changes are implicit. | Introduce Flyway/Liquibase migrations. |
-| Base alert rules added | Prometheus alert rules exist for HTTP errors, QA errors, latency, memory, and traffic lulls. | Wire Prometheus/Alertmanager to the rule file and tune thresholds to real traffic. |
+| Item | Why it remains |
+| --- | --- |
+| OAuth/OIDC login | Token RBAC is enough for a deployment gate, but not the final user identity system. |
+| Agent tool traces in responses | Metrics exist; detailed trace payloads are useful but not required for the minimum gate. |
+| Versioned GBrain skills | Skill run persistence exists; skill lifecycle governance can follow. |
+| Rich document parsing and reranking | Retrieval is stable enough for staging; quality work remains separate. |
+| Operator console | Operations are documented through scripts and metrics; a dashboard can come later. |
 
-## P2 Product Refinement
+## Maintenance Boundary
 
-| Gap | Impact | Recommended fix |
-| --- | --- | --- |
-| No evaluation set | Agent changes can silently reduce answer quality. | Add golden campus QA and tool-routing cases. |
-| No versioned skills | GBrain changes are hard to review or roll back. | Store skill version, owner, schedule, and changelog. |
-| No admin console | Skill runs and index health are not visible to operators. | Add an authenticated operator dashboard later. |
-
-## Maintenance Focus
-
-- Keep this repo focused on RAG, Wiki, Agent, and GBrain.
-- Do not add Hierarchy/Hyper aggregation here; keep that in `HyperMemory`.
-- Update README screenshots whenever the workbench UI or mode list changes.
-- Run `mvn -B test`, `npm run build`, and `npm audit --audit-level=moderate` before releases.
+Keep this repo focused on RAG, Wiki, Agent, and GBrain. Do not add HyperMemory aggregation here.
